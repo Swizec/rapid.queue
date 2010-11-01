@@ -1,0 +1,18 @@
+
+-- WHAT --
+
+The general idea of rapid.queue is helping people write async API's.
+
+The way it works is:
+- listen for incoming http connections
+- get tasks from http
+- push tasks to queue
+- multiple workers pull from queue
+- once a worker is done, post result over http back to client
+
+
+-- DEPENDANCIES --
+http://github.com/mranney/node_redis
+http://github.com/brainfucker/hashlib
+http://github.com/Slashed/daemon.node
+http://github.com/caolan/async
