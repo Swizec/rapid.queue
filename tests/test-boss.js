@@ -11,7 +11,6 @@ exports.push = function (test) {
     var messaged = false;
 
     listener.on("message", function (channel, message) {
-	console.log(channel);
 	test.equal(message, "task!", "wrong message");
 	messaged = true;
     });
@@ -80,7 +79,7 @@ exports.listen_fail = function (test) {
 	       JSON.stringify({queue: 'testing', parameters: []}),
 	       JSON.stringify({callback: 'http://example.com'}),
 	       JSON.stringify({callback: 'http://example.com', parameters: []}),
-	       JSON.stringify({callback: 'http://example.com', queue: 'testing'})]
+	       JSON.stringify({callback: 'http://example.com', queue: 'testing'})],
 	      bad_data, 
 	      function () { test.done() });
 }
