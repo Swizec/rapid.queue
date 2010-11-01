@@ -39,8 +39,8 @@ When processing the task is complete the same task with an added result paramete
 
 
 # DEPENDANCIES
-http://github.com/mranney/node_redis
-http://github.com/Slashed/daemon.node
-http://github.com/caolan/async
-http://bitbucket.org/mazzarelli/js-opts/wiki/Home
-http://github.com/mikeal/node-utils/tree/master/request/
+ * http://github.com/mranney/node_redis
+ * http://github.com/Slashed/daemon.node
+ * http://github.com/caolan/async
+ * http://bitbucket.org/mazzarelli/js-opts/wiki/Home
+ * http://github.com/mikeal/node-utils/tree/master/request/
