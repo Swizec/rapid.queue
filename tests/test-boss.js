@@ -10,22 +10,27 @@ exports.push = function (test) {
     var test_task = {'test': 'test-task'};
     var messaged = false;
 
+    var queue = "testing1";
+
     listener.on("message", function (channel, message) {
 	test.equal(message, "task!", "wrong message");
 	messaged = true;
     });
-    listener.subscribe("rapid.queue:testing:pub");
+    listener.subscribe("rapid.queue:"+queue+":pub");
 
     listener.on("subscribe", function (channel) {
-	redis.llen("rapid.queue:testing", function (err, old_len) {
-	    boss.push(test_task, "testing");
+	redis.llen("rapid.queue:"+queue, function (err, old_len) {
+	    boss.push(test_task, queue);
 	    
-	    redis.llen("rapid.queue:testing", function (err, new_len) {
+	    redis.llen("rapid.queue:"+queue, function (err, new_len) {
 		test.equal(new_len-old_len, 1, "didn't push");
 	    });
     
-	    redis.lpop("rapid.queue:testing", function (err, res) {
-		test.equal(res+"", test_task, "wrong task");
+	    redis.lpop("rapid.queue:"+queue, function (err, res) {
+		res = JSON.parse(res);
+		for (var k in res) {
+		    test.equal(res[k], test_task[k]);
+		}
 		test.equal(messaged, true, "no message");
 		
 		test.done();
@@ -37,10 +42,12 @@ exports.push = function (test) {
 exports.listen = function (test) {
     boss.listen(8124, "127.0.0.1");
 
+    var queue = "testing2";
+
     var request = http.createClient(8124, "127.0.0.1").request('POST', '/');
     request.write(JSON.stringify({parameters: "http://github.com/caolan/async",
 				  callback: 'http://127.0.0.1:8126',
-				  queue: 'testing'}));
+				  queue: queue}));
     request.end();
     request.on("response", function (response) {
 	response.on("data", function (chunk) {
@@ -75,8 +82,8 @@ exports.listen_fail = function (test) {
     var count = 0;
     async.map(["baldla", JSON.stringify({}),
 	       JSON.stringify({parameters: []}),
-	       JSON.stringify({queue: 'testing'}),
-	       JSON.stringify({queue: 'testing', parameters: []}),
+	       JSON.stringify({queue: 'testing3'}),
+	       JSON.stringify({queue: 'testing3', parameters: []}),
 	       JSON.stringify({callback: 'http://example.com'}),
 	       JSON.stringify({callback: 'http://example.com', parameters: []}),
 	       JSON.stringify({callback: 'http://example.com', queue: 'testing'})],
