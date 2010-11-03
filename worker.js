@@ -29,8 +29,6 @@ exports.listen = function (queue, worker, callback) {
 		    worker(task, notify_client);
 		}catch (e) {
 		    if (settings.notify_errors) {
-			console.log("sending mail");
-			console.log("Task: "+JSON.stringify(task)+"\n\n\n"+e.message+"\n\n"+e.stack);
 			var mail = require('mail').Mail(settings.mail.smtp);
 			mail.message(settings.mail.message)
 			    .body("Task: "+JSON.stringify(task)+"\n\n\n"+e.message+"\n\n"+e.stack)

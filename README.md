@@ -18,6 +18,10 @@ The settings.js file contains some basic configuration options.
 Run a redis server with default configuration.
 Run runner.js and you're set.
 
+To get a list of tasks in a certain queue just access boss.js from
+your browser with a queue argument, something like so:
+    http://127.0.0.1:8124/?queue=testing
+
 ## API
 
 To add a task to the server send a POST request to your configured listener address

@@ -1,6 +1,6 @@
 
 
-exports.daemonize = true;
+exports.daemonize = false;
 
 exports.workers = [
     {n: 2, queue: 'testing'},
