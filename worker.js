@@ -15,7 +15,7 @@ exports.listen = function (queue, worker, callback) {
 	    if (!err && task) {
 		task = JSON.parse(task+"");
 		var recurse = function () {process.nextTick(inner_worker)};
-		var notify = function (result) {
+		var notify_client = function (result) {
 		    task.result = result;
 		    request({uri: task.callback,
 			     method: 'POST',
@@ -26,9 +26,17 @@ exports.listen = function (queue, worker, callback) {
 		    };
 
 		try {
-		    worker(task, notify);
+		    worker(task, notify_client);
 		}catch (e) {
-		    notify("ERROR: Big fail\n\nMessage: "+e.message+"\nStack: "+e.stack);
+		    if (settings.notify_errors) {
+			console.log("sending mail");
+			console.log("Task: "+JSON.stringify(task)+"\n\n\n"+e.message+"\n\n"+e.stack);
+			var mail = require('mail').Mail(settings.mail.smtp);
+			mail.message(settings.mail.message)
+			    .body("Task: "+JSON.stringify(task)+"\n\n\n"+e.message+"\n\n"+e.stack)
+			    .send(function(err) {});
+		    }
+		    notify_client("ERROR: Big fail\n\nMessage: "+e.message+"\nStack: "+e.stack);
 		}
 	    }else{
 		BUSY = false;

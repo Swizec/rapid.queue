@@ -44,3 +44,4 @@ When processing the task is complete the same task with an added result paramete
  * http://github.com/caolan/async
  * http://bitbucket.org/mazzarelli/js-opts/wiki/Home
  * http://github.com/mikeal/node-utils/tree/master/request/
+ * http://github.com/weaver/node-mail (if you want error notifications)

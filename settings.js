@@ -14,3 +14,19 @@ exports.worker_mapping = {
 
 exports.listen_on = {port: 8124,
 		     host: "127.0.0.1"}
+
+exports.notify_errors = true;
+
+exports.mail = { 
+    smtp : {
+	host: 'smtp.gmail.com',
+	port: 465,
+	username: '',
+	password: ''
+    },
+    message : {
+	from: '',
+	to: [''],
+	subject: 'rapid.queue worker error'
+    }
+}
