@@ -14,15 +14,22 @@ exports.listen = function (queue, worker, callback) {
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
 	    if (!err && task) {
 		task = JSON.parse(task+"");
-		worker(task, function (result) {
+		var recurse = function () {process.nextTick(inner_worker)};
+		var notify = function (result) {
 		    task.result = result;
 		    request({uri: task.callback,
 			     method: 'POST',
 			     body: JSON.stringify(task)},
 			    function (error, response, body) {
-				inner_worker();
+				recurse();
 			    });
-		});
+		    };
+
+		try {
+		    worker(task, notify);
+		}catch (e) {
+		    notify("ERROR: Big fail\n\nMessage: "+e.message+"\nStack: "+e.stack);
+		}
 	    }else{
 		BUSY = false;
 	    }
