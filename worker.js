@@ -64,5 +64,8 @@ if (process.argv[0] == 'node') {
 	daemon.start();
     }
     var queue = process.argv[2];
-    exports.listen(queue, settings.worker_mapping[queue])
+    exports.listen(queue, settings.worker_mapping[queue], function () {
+	var poke = require("redis").createClient();
+	poke.publish("rapid.queue:"+queue+":pub", "task!");
+    });
 }
