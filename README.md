@@ -20,7 +20,9 @@ Run runner.js and you're set.
 
 To get a list of tasks in a certain queue just access boss.js from
 your browser with a queue argument, something like so:
-    http://127.0.0.1:8124/?queue=testing
+    http://127.0.0.1:8124/?list=tasks&queue=testing
+
+You can see the logs by going to: /?list=logs
 
 ## API
 

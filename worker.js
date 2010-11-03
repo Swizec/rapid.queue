@@ -4,6 +4,7 @@ var redis = require("redis").createClient(),
     http = require("http"),
     daemon = require('daemon'),
     settings = require('./settings'),
+    logging = require('./logging'),
     request = require('request');
 
 exports.listen = function (queue, worker, callback) {
@@ -23,7 +24,9 @@ exports.listen = function (queue, worker, callback) {
 			    function (error, response, body) {
 				recurse();
 			    });
-		    };
+
+		    logging.info("Served task "+task.id);
+		};
 
 		try {
 		    worker(task, notify_client);
@@ -34,6 +37,8 @@ exports.listen = function (queue, worker, callback) {
 			    .body("Task: "+JSON.stringify(task)+"\n\n\n"+e.message+"\n\n"+e.stack)
 			    .send(function(err) {});
 		    }
+
+		    logging.warning("Error serving task "+task.id);
 		    notify_client("ERROR: Big fail\n\nMessage: "+e.message+"\nStack: "+e.stack);
 		}
 	    }else{
