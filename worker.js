@@ -18,12 +18,16 @@ exports.listen = function (queue, worker, callback) {
 		var recurse = function () {process.nextTick(inner_worker)};
 		var notify_client = function (result) {
 		    task.result = result;
-		    request({uri: task.callback,
-			     method: 'POST',
-			     body: JSON.stringify(task)},
-			    function (error, response, body) {
-				recurse();
-			    });
+		    try {
+			request({uri: task.callback,
+				 method: 'POST',
+				 body: JSON.stringify(task)},
+				function (error, response, body) {
+				    recurse();
+				});
+		    }catch (e) {
+			logging.warning("Client callback unreachable "+task.id);
+		    }
 
 		    logging.info("Served task "+task.id);
 		};
