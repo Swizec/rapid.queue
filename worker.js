@@ -14,6 +14,8 @@ exports.listen = function (queue, worker, callback) {
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
 	    if (!err && task) {
+		logging.info("Started task "+task.id);
+
 		task = JSON.parse(task+"");
 		var recurse = function () {process.nextTick(inner_worker)};
 		var notify_client = function (result) {
