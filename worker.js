@@ -18,7 +18,9 @@ exports.listen = function (queue, worker, callback) {
 
 		logging.info("Started task "+task.id);
 
-		var recurse = function () {process.nextTick(inner_worker)};
+		var recurse = function () {
+		    process.nextTick(inner_worker)
+		};
 		var notify_client = function (result) {
 		    task.result = result;
 		    try {
@@ -31,6 +33,7 @@ exports.listen = function (queue, worker, callback) {
 		    }catch (e) {
 			logging.warning("Client callback unreachable "+task.id);
 		    }
+		    BUSY = false;
 
 		    logging.info("Served task "+task.id);
 		};
