@@ -12,15 +12,17 @@ exports.listen = function (queue, worker, callback) {
     var inner_worker = function () {
 	BUSY = true;
 
+	var recurse = function () {
+	    BUSY = false;
+	    process.nextTick(inner_worker)
+	};
+
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
 	    if (!err && task) {
 		task = JSON.parse(task+"");
 
 		logging.info("Started task "+task.id);
 
-		var recurse = function () {
-		    process.nextTick(inner_worker)
-		};
 		var notify_client = function (result) {
 		    task.result = result;
 		    try {
@@ -28,14 +30,13 @@ exports.listen = function (queue, worker, callback) {
 				 method: 'POST',
 				 body: JSON.stringify(task)},
 				function (error, response, body) {
+				    logging.info("Served task "+task.id);
 				    recurse();
 				});
 		    }catch (e) {
 			logging.warning("Client callback unreachable "+task.id);
+			recurse();
 		    }
-		    BUSY = false;
-
-		    logging.info("Served task "+task.id);
 		};
 
 		try {
@@ -52,7 +53,7 @@ exports.listen = function (queue, worker, callback) {
 		    notify_client("ERROR: Big fail\n\nMessage: "+e.message+"\nStack: "+e.stack);
 		}
 	    }else{
-		BUSY = false;
+		setTimeout(recurse, 500);
 	    }
 	});
     }
