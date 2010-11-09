@@ -13,8 +13,10 @@ exports.listen = function (queue, worker, callback) {
 	BUSY = true;
 
 	var recurse = function () {
-	    BUSY = false;
-	    process.nextTick(inner_worker)
+	    redis.on("idle", function (err, res) {
+		BUSY = false;
+		process.nextTick(inner_worker);
+	    });
 	};
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
