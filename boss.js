@@ -73,7 +73,7 @@ var handlers = {
 	    res.writeHead(400, {'Content-Type': 'text; encoding=utf-8'});
 	    res.end("No queue");
 	}else{
-	    queue = 'redis.queue:'+queue;
+	    queue = 'rapid.queue:'+queue;
 	    redis.llen(queue, function (err, len) {
 		redis.lrange(queue, 0, len, function (err, tasks) {
 		    res.writeHead(200);
