@@ -14,10 +14,7 @@ exports.listen = function (queue, worker, callback) {
 	BUSY = true;
 
 	var recurse = function () {
-	    console.log((new Date()).getTime()+" waiting for idle");
-
 	    var inner_recurse = function () {
-		console.log((new Date()).getTime()+" got idle");
 		BUSY = false;
 		process.nextTick(inner_worker);
 	    }
@@ -36,7 +33,6 @@ exports.listen = function (queue, worker, callback) {
 		logging.info("Started task "+task.id);
 
 		var notify_client = function (result) {
-		    console.log("callback!");
 		    task.result = result;
 		    try {
 			request({uri: task.callback,
