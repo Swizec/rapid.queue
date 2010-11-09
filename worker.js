@@ -9,16 +9,24 @@ var redis = require("redis").createClient(),
 
 exports.listen = function (queue, worker, callback) {
     var BUSY = false;
+
     var inner_worker = function () {
 	BUSY = true;
 
 	var recurse = function () {
 	    console.log((new Date()).getTime()+" waiting for idle");
-	    redis.on("idle", function (err, res) {
+
+	    var inner_recurse = function () {
 		console.log((new Date()).getTime()+" got idle");
 		BUSY = false;
 		process.nextTick(inner_worker);
-	    });
+	    }
+	    
+	    if (redis.command_queue.length > 0) {
+		redis.once("idle", inner_recurse);
+	    }else{
+		inner_recurse();
+	    }
 	};
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
