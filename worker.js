@@ -13,7 +13,9 @@ exports.listen = function (queue, worker, callback) {
 	BUSY = true;
 
 	var recurse = function () {
-	    redis.on("idle", function (err, res) {
+	    console.log((new Date()).getTime()+" waiting for idle");
+	    redis.on((new Date()).getTime()+" "idle", function (err, res) {
+		console.log("got idle");
 		BUSY = false;
 		process.nextTick(inner_worker);
 	    });
