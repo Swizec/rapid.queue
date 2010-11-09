@@ -36,6 +36,7 @@ exports.listen = function (queue, worker, callback) {
 		logging.info("Started task "+task.id);
 
 		var notify_client = function (result) {
+		    console.log("callback!");
 		    task.result = result;
 		    try {
 			request({uri: task.callback,
