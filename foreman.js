@@ -34,7 +34,7 @@ var status = function () {
 }
 
 var stop = function () {
-    process.kill(parseInt(fs.readFileSync(config.lockFile)));
+    process.kill(parseInt(fs.readFileSync(settings.lockFile)));
     process.exit(0);
 }
 
