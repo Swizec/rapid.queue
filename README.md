@@ -16,7 +16,9 @@ The way it works is:
 The settings.js file contains some basic configuration options.
 
 Run a redis server with default configuration.
-Run runner.js and you're set.
+Run the boss.js with port and listening ip
+    node boss.js 8124 127.0.0.1
+Run foreman.js and it will start the workers and make sure they keep running
 
 To get a list of tasks in a certain queue just access boss.js from
 your browser with a queue argument, something like so:
