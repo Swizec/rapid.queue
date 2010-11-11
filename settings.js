@@ -1,6 +1,6 @@
 
 
-exports.daemonize = false;
+exports.daemonize = true;
 
 exports.lockfile = '/tmp/rapid.queue.foreman.lock';
 

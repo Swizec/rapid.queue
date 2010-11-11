@@ -16,7 +16,7 @@ var start = function () {
 	for (var i = 0; i < work_conf.n; i++) {
 	    console.log("starting worker "+i+" for "+work_conf.queue);
 
-	    children.push(child.exec('node ./worker.js '+work_conf.queue, 
+	    children.push(child.exec('node ', ['worker.js', work_conf.queue], 
 				     function (err, stdout, stderr) {
 					 console.log(err);
 				     }));
