@@ -4,6 +4,8 @@ exports.daemonize = true;
 
 exports.lockfile = '/tmp/rapid.queue.foreman.lock';
 
+exports.path = '/home/swizec/Documents/preona-code/Plateboiler/rapid.queue';
+
 exports.workers = [
     {n: 2, queue: 'testing'},
 ]
