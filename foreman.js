@@ -1,5 +1,5 @@
 var settings = require('./settings'),
-    child = require('child_process'),
+    spawn = require('child_process').spawn,
     daemon = require('daemon'),
     fs = require('fs');
 
@@ -16,18 +16,11 @@ var start = function () {
 	for (var i = 0; i < work_conf.n; i++) {
 	    console.log("starting worker "+i+" for "+work_conf.queue);
 
-	    children.push(child.exec('node ', ['worker.js', work_conf.queue], 
-				     function (err, stdout, stderr) {
-					 console.log(err);
-				     }));
+	    //var child = spawn('node ', ['/home/swizec/Documents/preona-code/Plateboiler/rapid.queue/worker.js', work_conf.queue]);
+	    	var child = spawn('node', ['worker.js'], {cwd: settings.path});
+		child.on("exit", function (code) { console.log("worker exited with "+code)});
 	}
     }
-
-    setInterval(function () {
-	console.log("checking workers");
-
-	
-    }, 6000);
 }
 
 var status = function () {
