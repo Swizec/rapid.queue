@@ -9,21 +9,25 @@ var start = function () {
 	daemon.lock(settings.lockFile);
     }
 
-    var children = [];
+    var start_worker = function (queue) {
+	var child = spawn('node', ['worker.js', queue], {cwd: settings.path});
+	child.on("exit", function (code) {
+	    start_worker(queue);
+	});
+    }
 
     for (var j = 0; j < settings.workers.length; j++ ) {
 	var work_conf = settings.workers[j];
 	for (var i = 0; i < work_conf.n; i++) {
 	    console.log("starting worker "+i+" for "+work_conf.queue);
 
-	    //var child = spawn('node ', ['/home/swizec/Documents/preona-code/Plateboiler/rapid.queue/worker.js', work_conf.queue]);
-	    	var child = spawn('node', ['worker.js'], {cwd: settings.path});
-		child.on("exit", function (code) { console.log("worker exited with "+code)});
+	    start_worker(work_conf.queue);
 	}
     }
 }
 
 var status = function () {
+    console.log("No status reporting yet, try ps aux | grep node");
 }
 
 var stop = function () {
