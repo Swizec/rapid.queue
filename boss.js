@@ -102,9 +102,9 @@ var handlers = {
     }
 }
 
-/*if (process.argv[0] == 'node') {
+if (process.argv[0] == 'node') {
     if (settings.daemonize) {
 	daemon.start();
     }
     exports.listen(process.argv[2], process.argv[3])
-}*/
+}

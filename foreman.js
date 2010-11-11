@@ -1,5 +1,5 @@
 var settings = require('./settings'),
-    spawn = require('child_process').spawn,
+    child = require('child_process'),
     daemon = require('daemon'),
     fs = require('fs');
 
@@ -9,15 +9,25 @@ var start = function () {
 	daemon.lock(settings.lockFile);
     }
 
-    spawn('node', ['./boss.js', settings.listen_on.port, settings.listen_on.host]);
+    var children = [];
 
     for (var j = 0; j < settings.workers.length; j++ ) {
 	var work_conf = settings.workers[j];
 	for (var i = 0; i < work_conf.n; i++) {
 	    console.log("starting worker "+i+" for "+work_conf.queue);
-	    spawn('node', ['./worker.js', work_conf.queue]);
+
+	    children.push(child.exec('node ./worker.js '+work_conf.queue, 
+				     function (err, stdout, stderr) {
+					 console.log(err);
+				     }));
 	}
     }
+
+    setInterval(function () {
+	console.log("checking workers");
+
+	
+    }, 6000);
 }
 
 var status = function () {
