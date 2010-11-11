@@ -32,7 +32,11 @@ var status = function () {
 
 var stop = function () {
     process.kill(parseInt(fs.readFileSync(settings.lockFile)));
-    process.exit(0);
+}
+
+var restart = function () {
+    stop();
+    start();
 }
 
 if (process.argv.length < 3) {
