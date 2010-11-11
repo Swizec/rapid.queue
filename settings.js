@@ -2,6 +2,8 @@
 
 exports.daemonize = false;
 
+exports.lockfile = '/tmp/rapid.queue.foreman.lock';
+
 exports.workers = [
     {n: 2, queue: 'testing'},
 ]

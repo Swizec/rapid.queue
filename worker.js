@@ -79,6 +79,7 @@ exports.listen = function (queue, worker, callback) {
     });
 }
 
+/*
 if (process.argv[0] == 'node') {
     if (settings.daemonize) {
 	daemon.start();
@@ -88,4 +89,4 @@ if (process.argv[0] == 'node') {
 	var poke = require("redis").createClient();
 	poke.publish("rapid.queue:"+queue+":pub", "task!");
     });
-}
+}*/
