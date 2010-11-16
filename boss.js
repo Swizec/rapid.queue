@@ -51,7 +51,7 @@ var handlers = {
 		data = JSON.parse(data);
 	    }catch (e) {
 		res.writeHead(400);
-		res.end("Bad Request");
+		res.end("Bad Request, JSON not deserializable");
 		return;
 	    }
 	    
@@ -62,7 +62,7 @@ var handlers = {
 		res.end("queued");
 	    }else{
 		res.writeHead(400);
-		res.end("Bad Request");
+		res.end("Bad Request, some parameters missing in JSON");
 	    }
 	})},
 
