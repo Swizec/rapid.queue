@@ -15,8 +15,9 @@ exports.push = function (task, queue) {
     logging.info("Task "+task.id+" received: \n"+JSON.stringify(task));
 }
 
-exports.listen = function (port, host) {
+exports.listen = function (port, host, callback) {
     port = port || 8124, host = host || "127.0.0.1";
+    callback = callback || function () {};
     
     http.createServer(function (req, res) {
 	if (req.method == 'POST') {
@@ -27,7 +28,7 @@ exports.listen = function (port, host) {
 	}
 
 	
-    }).listen(port, host);
+    }).listen(port, host, callback);
 }
 
 var handlers = {

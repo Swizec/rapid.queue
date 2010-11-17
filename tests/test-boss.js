@@ -40,53 +40,54 @@ exports.push = function (test) {
 }
 
 exports.listen = function (test) {
-    boss.listen(8124, "127.0.0.1");
-
-    var queue = "testing2";
-
-    var request = http.createClient(8124, "127.0.0.1").request('POST', '/');
-    request.write(JSON.stringify({parameters: "http://github.com/caolan/async",
-				  callback: 'http://127.0.0.1:8126',
-				  queue: queue}));
-    request.end();
-    request.on("response", function (response) {
-	response.on("data", function (chunk) {
-	    test.equal(chunk+"", "queued");
-	    
-	    test.done();
+    boss.listen(8124, "127.0.0.1", function () {
+	var queue = "testing2";
+    
+	var request = http.createClient(8124, "127.0.0.1").request('POST', '/');
+	request.write(JSON.stringify({parameters: "http://github.com/caolan/async",
+				      callback: 'http://127.0.0.1:8126',
+				      queue: queue}));
+	request.end();
+	request.on("response", function (response) {
+	    response.on("data", function (chunk) {
+		test.equal(chunk+"", "queued");
+		
+		test.done();
+	    });
 	});
     });
 }
 
 exports.listen_fail = function (test) {
-    boss.listen(8125, "127.0.0.1");
+    boss.listen(8125, "127.0.0.1", function () {
 
-    var request = http.createClient(8125, "127.0.0.1").request('GET', '/');
-    request.end();
-    request.on("response", function (response) {
-	test.equal(response.statusCode, 400, "expected error");
-
-    });
-
-    var bad_data = function (data, callback) {
-	var request = http.createClient(8125, "127.0.0.1").request('POST', '/');
-	request.write(data);
+	var request = http.createClient(8125, "127.0.0.1").request('GET', '/');
 	request.end();
 	request.on("response", function (response) {
 	    test.equal(response.statusCode, 400, "expected error");
-
-	    callback();
+	    
 	});
-    }
+	
+	var bad_data = function (data, callback) {
+	    var request = http.createClient(8125, "127.0.0.1").request('POST', '/');
+	    request.write(data);
+	    request.end();
+	    request.on("response", function (response) {
+		test.equal(response.statusCode, 400, "expected error");
 
-    var count = 0;
-    async.map(["baldla", JSON.stringify({}),
-	       JSON.stringify({parameters: []}),
-	       JSON.stringify({queue: 'testing3'}),
-	       JSON.stringify({queue: 'testing3', parameters: []}),
-	       JSON.stringify({callback: 'http://example.com'}),
-	       JSON.stringify({callback: 'http://example.com', parameters: []}),
-	       JSON.stringify({callback: 'http://example.com', queue: 'testing'})],
-	      bad_data, 
-	      function () { test.done() });
+		callback();
+	    });
+	}
+
+	var count = 0;
+	async.map(["baldla", JSON.stringify({}),
+		   JSON.stringify({parameters: []}),
+		   JSON.stringify({queue: 'testing3'}),
+		   JSON.stringify({queue: 'testing3', parameters: []}),
+		   JSON.stringify({callback: 'http://example.com'}),
+		   JSON.stringify({callback: 'http://example.com', parameters: []}),
+		   JSON.stringify({callback: 'http://example.com', queue: 'testing'})],
+		  bad_data, 
+		  function () { test.done() });
+    });
 }
