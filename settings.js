@@ -7,13 +7,14 @@ exports.lockfile = '/tmp/rapid.queue.foreman.lock';
 exports.path = '/home/swizec/Documents/preona-code/Plateboiler/rapid.queue';
 
 exports.workers = [
-    {n: 2, queue: 'testing'},
+    {n: 1, queue: 'scraping'}
 ]
 
 exports.worker_mapping = {
     // make sure your worker accepts a callback as the last argument and calls it with result
     //'scraping': require('scraper').scrape
-    'testing': function () {}
+    'testing': function () {},
+    'scraping': require('../plateboiler').scrape
 }
 
 exports.listen_on = {port: 8124,

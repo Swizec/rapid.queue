@@ -5,7 +5,8 @@ var redis = require("redis").createClient(),
     daemon = require('daemon'),
     settings = require('./settings'),
     logging = require('./logging'),
-    request = require('request');
+    request = require('request'),
+    urllib = require('url');
 
 exports.listen = function (queue, worker, callback) {
     var BUSY = false;
@@ -35,13 +36,20 @@ exports.listen = function (queue, worker, callback) {
 		var notify_client = function (result) {
 		    task.result = result;
 		    try {
-			request({uri: task.callback,
-				 method: 'POST',
-				 body: JSON.stringify(task)},
-				function (error, response, body) {
-				    logging.info("Served task "+task.id);
-				    recurse();
-				});
+			var url = urllib.parse(task.callback);
+
+			var client = http.createClient(url.port, url.hostname);
+			var request = client.request('POST', url.pathname || '/');
+			request.write(JSON.stringify(task));
+			request.end();
+			request.on("response", function (response) {
+			    if (response.statusCode != 200) {
+				logging.warning("Client responded with error "+task.id);
+			    }else{
+				logging.info("Served task "+task.id);
+			    }
+			    recurse();
+			});
 		    }catch (e) {
 			logging.warning("Client callback unreachable "+task.id);
 			recurse();
