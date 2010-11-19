@@ -38,8 +38,11 @@ exports.listen = function (queue, worker, callback) {
 		    try {
 			var url = urllib.parse(task.callback);
 
-			var client = http.createClient(url.port, url.hostname);
-			var request = client.request('POST', url.pathname || '/');
+			var client = http.createClient(url.port || 80, url.hostname);
+			var request = client.request(
+			    'POST', 
+			    url.pathname || '/', 
+			    {'host': url.hostname});
 			request.write(JSON.stringify(task));
 			request.end();
 			request.on("response", function (response) {

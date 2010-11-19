@@ -10,7 +10,10 @@ exports.listen = function (test) {
         	queue: 'testing5'}
     var do_work = function(fixture, callback) {
 	for (var k in fixture) {
-	    test.equal(fixture[k], task[k]);
+	    if (k != 'id') {
+		test.equal(fixture[k], task[k]);
+	    }
+	    test.ok(fixture.id);
 	}
 
 	test.done();
