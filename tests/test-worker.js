@@ -41,6 +41,7 @@ exports.callback = function (test) {
 	    var data = "";
 	    req.on("data", function (chunk) { data+=chunk });
 	    req.on("end", function () {
+		test.equal(req.headers['content-length'], data.length);
 		data = JSON.parse(data);
 		test.equal(data.result, 'called back');
 

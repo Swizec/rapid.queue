@@ -37,13 +37,14 @@ exports.listen = function (queue, worker, callback) {
 		    task.result = result;
 		    try {
 			var url = urllib.parse(task.callback);
-			//var body = JSON.stringify(task);
+			var body = JSON.stringify(task);
 
 			var client = http.createClient(url.port || 80, url.hostname);
 			var request = client.request('POST', 
 						     url.pathname || '/',
-						     {'host': url.hostname});
-			request.write(JSON.stringify(task));
+						     {'host': url.hostname,
+						      'Content-Length': body.length});
+			request.write(body);
 			request.end();
 			request.on("response", function (response) {
 			    if (response.statusCode != 200) {
