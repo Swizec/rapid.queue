@@ -37,13 +37,13 @@ exports.listen = function (queue, worker, callback) {
 		    task.result = result;
 		    try {
 			var url = urllib.parse(task.callback);
-			var body = JSON.stringify(task);
+			//var body = JSON.stringify(task);
 
-			var client = http.createClient(url.port, url.hostname);
-			var request = client.request('POST', url.pathname || '/',
-						     {'host': url.hostname,
-						      'Content-Length': body.length});
-			request.write(body);
+			var client = http.createClient(url.port || 80, url.hostname);
+			var request = client.request('POST', 
+						     url.pathname || '/',
+						     {'host': url.hostname});
+			request.write(JSON.stringify(task));
 			request.end();
 			request.on("response", function (response) {
 			    if (response.statusCode != 200) {
@@ -90,14 +90,8 @@ exports.listen = function (queue, worker, callback) {
     });
 }
 
-/*
-if (process.argv[0] == 'node') {
-    if (settings.daemonize) {
-	daemon.start();
-    }*/
-    var queue = process.argv[2];
-    exports.listen(queue, settings.worker_mapping[queue], function () {
-	var poke = require("redis").createClient();
-	poke.publish("rapid.queue:"+queue+":pub", "task!");
-    });
-/*}*/
+var queue = process.argv[2];
+exports.listen(queue, settings.worker_mapping[queue], function () {
+    var poke = require("redis").createClient();
+    poke.publish("rapid.queue:"+queue+":pub", "task!");
+});
