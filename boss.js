@@ -11,7 +11,7 @@ exports.push = function (task, queue) {
 
     redis.rpush("rapid.queue:"+queue, JSON.stringify(task), function () {
 	redis.llen("rapid.queue:"+queue, function (err, len) {
-	    if (len < 2)
+	    if (len < 5)
 		notify.publish("rapid.queue:"+queue+":pub", "task!");
 	});
     });
