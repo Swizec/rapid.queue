@@ -10,7 +10,11 @@ exports.push = function (task, queue) {
     task.id = (new Date()).getTime();
 
     redis.rpush("rapid.queue:"+queue, JSON.stringify(task));
-    notify.publish("rapid.queue:"+queue+":pub", "task!");
+    redis.llen("rapid.queue:"+queue, function (err, len) {
+	if (len < 5) {
+	    notify.publish("rapid.queue:"+queue+":pub", "task!");
+	}
+    });
 
     logging.info("Task "+task.id+" received: \n"+JSON.stringify(task));
 }
