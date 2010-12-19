@@ -7,7 +7,7 @@ exports.lockfile = '/tmp/rapid.queue.foreman.lock';
 exports.path = '/home/swizec/Documents/preona-code/Plateboiler/rapid.queue';
 
 exports.workers = [
-    {n: 1, queue: 'scraping'}
+    {n: 5, queue: 'scraping'}
 ]
 
 exports.worker_mapping = {
