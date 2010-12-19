@@ -14,9 +14,7 @@ exports.listen = function (queue, worker, callback) {
     var BUSY = false;
     var emitter = new EventEmitter();
 
-    var notify_client = function (task, callback) {
-	callback = callback || function () {}
-
+    var notify_client = function (task) {
 	try {
 	    var url = urllib.parse(task.callback);
 	    var body = JSON.stringify(task);
@@ -34,12 +32,9 @@ exports.listen = function (queue, worker, callback) {
 		}else{
 		    logging.info("Served task "+task.id);
 		}
-		
-		callback(null, 'meow');
 	    });
 	}catch (e) {
 	    logging.warning("Client callback unreachable "+task.id);
-	    callback(null, 'meow');
 	}
     };
 
