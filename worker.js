@@ -58,65 +58,35 @@ exports.listen = function (queue, worker, callback) {
 	}
     };
 
+    var execute = function (task, callback) {
+	worker(task, function (result) {
+	    emitter.emit('notify-client', result);
+	    callback();
+	})
+    }
+
     var inner_worker = function () {
 	BUSY = true;
 
-	var execute = function (tasks, callback) {
-	    var callbacks = 0;
-	    try {
-		worker(tasks, function (result) {
-		    callbacks++;
-		    emitter.emit('notify-client', result, function () {
-			if (callbacks >= tasks.length) {
-			    callback();
-			}
-		    });
-		});
-	    }catch (e) {
-		for (var i=0; i < tasks.length; i++) {
-		    tasks[i].result = "ERROR: failing worker";
-		    emitter.emit('notify-client', tasks[i], function () {
-			if (callbacks >= tasks.length) {
-			    callback();
-			}
-		    });
-		}
-	    }
-	}
-
-	async.mapSeries([1],
-		  function (bla, callback) {
-		      redis.lpop("rapid.queue:"+queue, function (err, task) {
-			  if (task) {
-			      task = JSON.parse(task+"");
+	redis.lpop("rapid.queue:"+queue, function (err, task) {
+	    if (task) {
+		task = JSON.parse(task+"");
 			      
-			      logging.info("Started task "+task.id);
-			  
-			      callback(null, task);
-			  }else{
-			      callback(null, null);
-			  }
-		      });
-		  },
-		  function (err, tasks) {
-		      if (!err) {
-			  var tmp = [], i=0;
-			  for (; i < tasks.length; i++) {
-			      if (tasks[i]) tmp[i] = tasks[i];
-			  }
-			  if (tmp.length > 0) {
-			      execute(tmp, function () {
-				  recurse();
-			      })
-			  }else {
-			      recurse();
-			  }
-		      }
-		  });
+		logging.info("Started task "+task.id);
+		
+		execute(task, function () {
+		    emitter.emit('recurse');
+		});
+	    }else{
+		callback(null, null);
+	    }
+	});
     }
 
     emitter.addListener('inner-worker', inner_worker);
     emitter.addListener('notify-client', notify_client);
+    emitter.addListener('recurse', recurse);
+	
 
     listener.subscribe("rapid.queue:"+queue+":pub");
     listener.on("message", function (channel, message) {
