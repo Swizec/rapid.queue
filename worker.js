@@ -15,6 +15,8 @@ exports.listen = function (queue, worker, callback) {
     var emitter = new EventEmitter();
 
     var notify_client = function (task, callback) {
+	callback = callback || function () {}
+
 	try {
 	    var url = urllib.parse(task.callback);
 	    var body = JSON.stringify(task);
@@ -71,12 +73,16 @@ exports.listen = function (queue, worker, callback) {
 	}
     }
 
+    var index = 0;
+
     var inner_worker = function () {
 	BUSY = true;
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
 	    if (!err && task) {
 		task = JSON.parse(task+"");
+
+		task.index = index++;
 			      
 		logging.info("Started task "+task.id);
 		
