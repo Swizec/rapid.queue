@@ -50,7 +50,8 @@ exports.callback = function (test) {
 	}).listen(8127, '127.0.0.1');
 
 	var do_work = function(task, callback) {
-	    callback("called back");
+	    task.result = "called back";
+	    callback(task);
 	};
 
 	worker.listen('testing4', do_work, function () {
