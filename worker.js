@@ -61,17 +61,24 @@ exports.listen = function (queue, worker, callback) {
 	    };
 
 	    var callbacks = 0;
-	    worker(tasks, function (result) {
-		callbacks++;
-		notify_client(result, function () {
-		    if (callbacks >= tasks.length) {
-			callback();
-		    }
+	    try {
+		worker(tasks, function (result) {
+		    callbacks++;
+		    notify_client(result, function () {
+			if (callbacks >= tasks.length) {
+			    callback();
+			}
+		    });
 		});
-	    });
+	    }catch (e) {
+		for (var i=0; i < tasks.length; i++) {
+		    tasks[i].result = "ERROR: failing worker";
+		    notify_client(tasks[i]);
+		}
+	    }
 	}
 
-	async.mapSeries([1,2,3,4,5],
+	async.mapSeries([1],
 		  function (bla, callback) {
 		      redis.lpop("rapid.queue:"+queue, function (err, task) {
 			  if (task) {

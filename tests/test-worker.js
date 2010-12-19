@@ -15,6 +15,7 @@ exports.listen = function (test) {
         	    queue: 'testing5'};
 
 	var do_work = function(fixture, callback) {
+	    var fixture = fixture[0];
 	    for (var k in fixture) {
 		if (k != 'id') {
 		    test.equal(fixture[k], prototask[k]);
@@ -50,7 +51,9 @@ exports.callback = function (test) {
 	}).listen(8127, '127.0.0.1');
 
 	var do_work = function(task, callback) {
-	    callback("called back");
+	    task = task[0];
+	    task.result = "called back";
+	    callback(task);
 	};
 
 	worker.listen('testing4', do_work, function () {
