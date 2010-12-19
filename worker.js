@@ -6,7 +6,8 @@ var redis = require("redis").createClient(),
     settings = require('./settings'),
     logging = require('./logging'),
     request = require('request'),
-    urllib = require('url');
+    urllib = require('url'),
+    async = require('async');
 
 exports.listen = function (queue, worker, callback) {
     var BUSY = false;
@@ -17,7 +18,11 @@ exports.listen = function (queue, worker, callback) {
 	var recurse = function () {
 	    var inner_recurse = function () {
 		BUSY = false;
-		process.nextTick(inner_worker);
+		redis.llen("rapid.queue:"+queue, function (err, len) {
+		    if (len > 0) {
+			process.nextTick(inner_worker);
+		    }
+		});
 	    }
 	    
 	    if (redis.command_queue.length > 0) {
@@ -26,6 +31,19 @@ exports.listen = function (queue, worker, callback) {
 		inner_recurse();
 	    }
 	};
+
+	var bla = [1,2,3,4,5];
+	async.mapSeries(bla,
+		  function (bla, callback) {
+		      redis.lpop("rapid.queue:"+queue, callback);
+		  },
+		  function (err, tasks) {
+		      if (!err) {
+			  console.log(tasks);
+		      }
+		      recurse();
+		  });
+	return '';
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
 	    if (!err && task) {
@@ -81,11 +99,13 @@ exports.listen = function (queue, worker, callback) {
 
     listener.subscribe("rapid.queue:"+queue+":pub");
     listener.on("message", function (channel, message) {
+	console.log("message!");
 	if (message == 'task!' && !BUSY) {
 	    inner_worker();
 	}
     });
     listener.on("subscribe", function (channel) {
+	console.log("subscribed");
 	callback = callback || function () {};
 	callback();
     });
