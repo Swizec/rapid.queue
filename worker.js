@@ -69,7 +69,7 @@ exports.listen = function (queue, worker, callback) {
 	BUSY = true;
 
 	redis.lpop("rapid.queue:"+queue, function (err, task) {
-	    if (task) {
+	    if (!err && task) {
 		task = JSON.parse(task+"");
 			      
 		logging.info("Started task "+task.id);
@@ -78,7 +78,7 @@ exports.listen = function (queue, worker, callback) {
 		    emitter.emit('recurse');
 		});
 	    }else{
-		callback(null, null);
+		emitter.emit('recurse');
 	    }
 	});
     }
