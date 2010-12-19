@@ -34,7 +34,6 @@ exports.listen = function (queue, worker, callback) {
 
 	var execute = function (tasks, callback) {
 	    var notify_client = function (task, callback) {
-		console.log("notifying");
 		try {
 		    var url = urllib.parse(task.callback);
 		    var body = JSON.stringify(task);
@@ -66,7 +65,6 @@ exports.listen = function (queue, worker, callback) {
 		callbacks++;
 		notify_client(result, function () {
 		    if (callbacks >= tasks.length) {
-			console.log("going for more");
 			callback();
 		    }
 		});
@@ -100,15 +98,12 @@ exports.listen = function (queue, worker, callback) {
 			  }else {
 			      recurse();
 			  }
-			  console.log(tmp);
-			  console.log('\n');
 		      }
 		  });
     }
 
     listener.subscribe("rapid.queue:"+queue+":pub");
     listener.on("message", function (channel, message) {
-	console.log("message!");
 	if (message == 'task!' && !BUSY) {
 	    inner_worker();
 	}
