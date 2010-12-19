@@ -7,64 +7,66 @@ var redis = require("redis").createClient(),
     logging = require('./logging'),
     request = require('request'),
     urllib = require('url'),
+    EventEmitter = require('events').EventEmitter,
     async = require('async');
 
 exports.listen = function (queue, worker, callback) {
     var BUSY = false;
+    var emitter = new EventEmitter();
+
+    var notify_client = function (task, callback) {
+	try {
+	    var url = urllib.parse(task.callback);
+	    var body = JSON.stringify(task);
+	    
+	    var client = http.createClient(url.port || 80, url.hostname);
+	    var request = client.request('POST', 
+		url.pathname || '/',
+		{'host': url.hostname,
+		'Content-Length': body.length});
+	    request.write(body);
+	    request.end();
+	    request.on("response", function (response) {
+		if (response.statusCode != 200) {
+		    logging.warning("Client responded with error "+task.id);
+		}else{
+		    logging.info("Served task "+task.id);
+		}
+		
+		callback(null, 'meow');
+	    });
+	}catch (e) {
+	    logging.warning("Client callback unreachable "+task.id);
+	    callback(null, 'meow');
+	}
+    };
+
+    var recurse = function () {
+	var inner_recurse = function () {
+	    BUSY = false;
+	    redis.llen("rapid.queue:"+queue, function (err, len) {
+		if (len > 0) {
+		    emitter.emit("inner-worker");
+		}
+	    });
+	}
+	
+	if (redis.command_queue.length > 0) {
+	    redis.once("idle", inner_recurse);
+	}else{
+	    inner_recurse();
+	}
+    };
 
     var inner_worker = function () {
 	BUSY = true;
 
-	var recurse = function () {
-	    var inner_recurse = function () {
-		BUSY = false;
-		redis.llen("rapid.queue:"+queue, function (err, len) {
-		    if (len > 0) {
-			process.nextTick(inner_worker);
-		    }
-		});
-	    }
-	    
-	    if (redis.command_queue.length > 0) {
-		redis.once("idle", inner_recurse);
-	    }else{
-		inner_recurse();
-	    }
-	};
-
 	var execute = function (tasks, callback) {
-	    var notify_client = function (task, callback) {
-		try {
-		    var url = urllib.parse(task.callback);
-		    var body = JSON.stringify(task);
-		    
-		    var client = http.createClient(url.port || 80, url.hostname);
-		    var request = client.request('POST', 
-			url.pathname || '/',
-			{'host': url.hostname,
-			'Content-Length': body.length});
-		    request.write(body);
-		    request.end();
-		    request.on("response", function (response) {
-			if (response.statusCode != 200) {
-			    logging.warning("Client responded with error "+task.id);
-			}else{
-			    logging.info("Served task "+task.id);
-			}
-			
-			callback(null, 'meow');
-		    });
-		}catch (e) {
-		    logging.warning("Client callback unreachable "+task.id);
-		    callback(null, 'meow');
-		}
-	    };
-
 	    var callbacks = 0;
 	    try {
 		worker(tasks, function (result) {
 		    callbacks++;
-		    notify_client(result, function () {
+		    emitter.emit('notify-client', result, function () {
 			if (callbacks >= tasks.length) {
 			    callback();
 			}
@@ -73,7 +75,11 @@ exports.listen = function (queue, worker, callback) {
 	    }catch (e) {
 		for (var i=0; i < tasks.length; i++) {
 		    tasks[i].result = "ERROR: failing worker";
-		    notify_client(tasks[i]);
+		    emitter.emit('notify-client', tasks[i], function () {
+			if (callbacks >= tasks.length) {
+			    callback();
+			}
+		    });
 		}
 	    }
 	}
@@ -109,10 +115,13 @@ exports.listen = function (queue, worker, callback) {
 		  });
     }
 
+    emitter.addListener('inner-worker', inner_worker);
+    emitter.addListener('notify-client', notify_client);
+
     listener.subscribe("rapid.queue:"+queue+":pub");
     listener.on("message", function (channel, message) {
 	if (message == 'task!' && !BUSY) {
-	    inner_worker();
+	    emitter.emit('inner-worker');
 	}
     });
     listener.on("subscribe", function (channel) {
