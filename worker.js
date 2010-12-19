@@ -59,10 +59,16 @@ exports.listen = function (queue, worker, callback) {
     };
 
     var execute = function (task, callback) {
-	worker(task, function (result) {
-	    emitter.emit('notify-client', result);
+	try {
+	    worker(task, function (result) {
+		emitter.emit('notify-client', result);
+		callback();
+	    })
+	}catch (e) {
+	    task.result = "ERROR: faling worker";
+	    emitter.emit('notify-client', task);
 	    callback();
-	})
+	}
     }
 
     var inner_worker = function () {
