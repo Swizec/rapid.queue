@@ -17,8 +17,8 @@ exports.worker_mapping = {
     'scraping': require('../plateboiler').scrape
 }
 
-exports.listen_on = {port: 8124,
-		     host: "127.0.0.1"}
+exports.listen_on = [{port: 8124,
+		      host: "127.0.0.1"}]
 
 exports.notify_errors = true;
 
