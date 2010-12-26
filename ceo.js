@@ -18,11 +18,9 @@ var start = function () {
 
     for (var j = 0; j < settings.listen_on.length; j++ ) {
 	var boss_conf = settings.listen_on[j];
-	for (var i = 0; i < boss_conf.n; i++) {
-	    console.log("starting boss "+i+" at "+boss_conf.host+":"+boss_conf.port);
+        console.log("starting boss "+j+" at "+boss_conf.host+":"+boss_conf.port);
 
-	    start_boss(boss_conf.port, boss_conf.host);
-	}
+        start_boss(boss_conf.port, boss_conf.host);
     }
 }
 
