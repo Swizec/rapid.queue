@@ -12,7 +12,7 @@ var start = function () {
     var start_boss = function (port, host) {
 	var child = spawn('node', ['boss.js', port, host], {cwd: settings.path});
 	child.on("exit", function (code) {
-	    start_worker(queue);
+	    start_boss(port, host);
 	});
     }
 
