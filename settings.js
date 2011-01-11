@@ -35,3 +35,6 @@ exports.mail = {
 	subject: 'rapid.queue worker error'
     }
 }
+
+exports.logging = {log: true,
+		   max_length: 5000}
