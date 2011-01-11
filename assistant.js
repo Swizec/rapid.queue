@@ -16,7 +16,7 @@ var handlers = {
 	}else{
 	    queue = 'rapid.queue:'+queue;
 	    redis.llen(queue, function (err, len) {
-		if (len > 500) len = 500;
+		if (len > 2000) len = 2000;
 
 		redis.lrange(queue, 0, len, function (err, tasks) {
 		    res.writeHead(200);
@@ -34,7 +34,7 @@ var handlers = {
 
     list_logs: function (req, res) {
 	redis.llen("rapid.queue:logs", function (err, len) {
-	    if (len > 500) len = 500;
+	    if (len > 2000) len = 2000;
 
 	    redis.lrange("rapid.queue:logs", 0, len, function (err, entries) {
 		res.writeHead(200);

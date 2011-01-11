@@ -9,14 +9,18 @@ var redis = require("redis").createClient(),
 exports.push = function (task, queue) {
     task.id = (new Date()).getTime();
 
-    redis.rpush("rapid.queue:"+queue, JSON.stringify(task));
-    notify.publish("rapid.queue:"+queue+":pub", "task!");
-
+    redis.rpush("rapid.queue:"+queue, JSON.stringify(task), function () {
+	redis.llen("rapid.queue:"+queue, function (err, len) {
+	    //if (len < 5)
+		notify.publish("rapid.queue:"+queue+":pub", "task!");
+	});
+    });
     logging.info("Task "+task.id+" received: \n"+JSON.stringify(task));
 }
 
-exports.listen = function (port, host) {
+exports.listen = function (port, host, callback) {
     port = port || 8124, host = host || "127.0.0.1";
+    callback = callback || function () {};
     
     http.createServer(function (req, res) {
 	if (req.method == 'POST') {
@@ -27,7 +31,7 @@ exports.listen = function (port, host) {
 	}
 
 	
-    }).listen(port, host);
+    }).listen(port, host, callback);
 }
 
 var handlers = {
