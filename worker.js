@@ -41,11 +41,7 @@ exports.listen = function (queue, worker, callback) {
     var recurse = function () {
 	var inner_recurse = function () {
 	    BUSY = false;
-	    redis.llen("rapid.queue:"+queue, function (err, len) {
-		if (len > 0) {
-		    emitter.emit("inner-worker");
-		}
-	    });
+	    emitter.emit("inner-worker");
 	}
 	
 	if (redis.command_queue.length > 0) {
@@ -85,7 +81,10 @@ exports.listen = function (queue, worker, callback) {
 		    emitter.emit('recurse');
 		});
 	    }else{
-		emitter.emit('recurse');
+		BUSY = false;
+		setTimeout(function () {
+		    emitter.emit('recurse');
+		}, settings.poll_wait);
 	    }
 	});
     }
