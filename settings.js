@@ -38,3 +38,6 @@ exports.mail = {
 
 exports.logging = {log: true,
 		   max_length: 5000}
+
+// how long to wait before polling when no tasks are fetched
+exports.poll_wait = 5000;
